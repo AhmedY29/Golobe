@@ -5,10 +5,91 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import ImageGallery from "../signin/ImageGallery";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 function SignUp() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreement, setAgreement] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const supabase = createClient();
+  const router = useRouter();
+
+  const handleSignUp = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      if (firstName.trim() == "") {
+        setError("Please Enter Your First Name");
+        setLoading(false);
+        return;
+      }
+
+      if (lastName.trim() == "") {
+        setError("Please Enter Your Last Name");
+        setLoading(false);
+        return;
+      }
+
+      if (email.trim() == "") {
+        setError("Please Enter Your Email");
+        setLoading(false);
+        return;
+      }
+
+      if (phone.trim() == "") {
+        setError("Please Enter Your Phone Number");
+        setLoading(false);
+        return;
+      }
+
+      if (password.trim() == "") {
+        setError("Please Enter Your Email");
+        setLoading(false);
+        return;
+      }
+
+      if (confirmPassword.trim() == "") {
+        setError("Please Enter Your Confirm Password");
+        setLoading(false);
+        return;
+      }
+
+      if (confirmPassword.trim() != password.trim()) {
+        setError("Passwords Doesn't match");
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.signUp({
+        email: email.toLowerCase(),
+        password,
+        phone,
+        options: {
+          data: {
+            firstName: firstName.toLowerCase(),
+            lastName: lastName.toLowerCase(),
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+      router.push("/");
+    } catch (error: any) {
+      console.error(error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
       <div className="images hidden md:block h-full m-10">
@@ -33,22 +114,27 @@ function SignUp() {
             </p>
           </div>
 
-          <div className="form-inputs flex flex-col gap-5">
+          <form
+            action={handleSignUp}
+            className="form-inputs flex flex-col gap-5"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <InputGroup
                 label="First Name"
-                value={email}
+                value={firstName}
+                required={true}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setEmail(e.target.value)
+                  setFirstName(e.target.value)
                 }
                 placeholder="Enter Your First name"
                 type="text"
               />
               <InputGroup
                 label="Last Name"
-                value={email}
+                value={lastName}
+                required={true}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setEmail(e.target.value)
+                  setLastName(e.target.value)
                 }
                 placeholder="Enter Your Last name"
                 type="text"
@@ -56,6 +142,7 @@ function SignUp() {
               <InputGroup
                 label="Email"
                 value={email}
+                required={true}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setEmail(e.target.value)
                 }
@@ -64,9 +151,10 @@ function SignUp() {
               />
               <InputGroup
                 label="Phone Number"
-                value={email}
+                value={phone}
+                required={true}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setEmail(e.target.value)
+                  setPhone(e.target.value)
                 }
                 placeholder="Enter Your Phone Number"
                 type="text"
@@ -75,6 +163,8 @@ function SignUp() {
             <InputGroup
               label="Password"
               value={password}
+              required={true}
+              min={6}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setPassword(e.target.value)
               }
@@ -83,9 +173,11 @@ function SignUp() {
             />
             <InputGroup
               label="Confirm Password"
-              value={password}
+              value={confirmPassword}
+              required={true}
+              min={6}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPassword(e.target.value)
+                setConfirmPassword(e.target.value)
               }
               placeholder="Enter Your Confirm Password"
               type="password"
@@ -96,6 +188,11 @@ function SignUp() {
                 className="w-4 h-4 accent-[#8DD3BB] cursor-pointer"
                 type="checkbox"
                 name="remember"
+                required
+                checked={agreement}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setAgreement(e.target.checked)
+                }
                 id="remember"
               />
               <label htmlFor="remember">
@@ -109,8 +206,14 @@ function SignUp() {
                 </a>{" "}
               </label>
             </div>
-
-            <PrimaryButton text="Create Account" />
+            {error && (
+              <h1 className="text-[#FF8682]"> Error in Logged in: {error}</h1>
+            )}
+            <PrimaryButton
+              text="Create Account"
+              type="submit"
+              loading={loading}
+            />
             <h1 className="text-center">
               Already have an account?{" "}
               <a className="text-[#FF8682]" href="#">
@@ -133,7 +236,7 @@ function SignUp() {
                 />
               </PrimaryButton>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>

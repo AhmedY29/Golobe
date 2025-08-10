@@ -5,6 +5,9 @@ interface InputGroupProps {
   label: string;
   type?: string;
   placeholder?: string;
+  min?: number;
+  max?: number;
+  required?: boolean;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -18,10 +21,13 @@ function InputGroup(props: InputGroupProps) {
         className="border-1 rounded focus:border-2 focus:border-black focus:shadow p-3"
         type={showPassword ? "text" : props.type}
         name={props.label}
+        required={props.required || false}
         value={props.value}
         id={props.label}
         onChange={props.onChange}
         placeholder={props.placeholder}
+        minLength={props.min}
+        maxLength={props.max}
       />
       <label
         className="absolute top-[-10px] left-2.5 px-2 bg-white text-sm"
