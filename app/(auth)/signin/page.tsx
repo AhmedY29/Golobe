@@ -6,7 +6,7 @@ import InputGroup from "@/components/InputGroup";
 import PrimaryButton from "@/components/PrimaryButton";
 import ImageGallery from "./ImageGallery";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -15,9 +15,6 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
   const router = useRouter();
-
-  const searchParams = useSearchParams();
-  const next = searchParams.get("next");
 
   const handleSignIn = async () => {
     setLoading(true);
